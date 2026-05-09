@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deha Uzar — Gömülü Sistemler & Yapay Zeka Geliştiricisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-void: #070A0F;
+  --bg-deep: #0B0F17;
+  --bg-panel: #0E1420;
+  --bg-card: #111827;
+  --bg-card-hover: #141d2e;
+  --midnight: #0a1628;
+  --anthracite: #1a2035;
+  --steel: #263045;
+  --border-dim: rgba(99,130,180,0.08);
+  --border-glow: rgba(99,160,255,0.18);
+  --ice: #7EB8F7;
+  --ice-dim: rgba(126,184,247,0.65);
+  --ice-muted: rgba(126,184,247,0.12);
+  --accent: #4F8EF7;
+  --accent-bright: #6DAAFF;
+  --corp-blue: #1A4E8C;
+  --text-primary: #E8EDF5;
+  --text-secondary: #8899BB;
+  --text-dim: #4A5876;
+  --text-mono: #5B9BD5;
+  --glass-bg: rgba(14,20,32,0.72);
+  --glass-border: rgba(126,184,247,0.10);
+  --shadow-blue: rgba(79,142,247,0.12);
+  --shadow-deep: rgba(0,0,0,0.6);
+  --ff-display: 'Syne', sans-serif;
+  --ff-body: 'Outfit', sans-serif;
+  --ff-mono: 'DM Mono', monospace;
+  --transition: 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--ff-body);
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CUSTOM CURSOR ─────────────────────────────── */
+.cursor {
+  position: fixed;
+  width: 10px; height: 10px;
+  background: var(--accent-bright);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(109,170,255,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1), width 0.3s, height 0.3s, border-color 0.3s;
+}
+.cursor-ring.hovering {
+  width: 56px; height: 56px;
+  border-color: rgba(109,170,255,0.7);
+}
+
+/* ── NOISE OVERLAY ─────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+}
+
+/* ── SCANLINES ─────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── BACKGROUND MESH ───────────────────────────── */
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-mesh::before {
+  content: '';
+  position: absolute;
+  top: -20%; left: -10%;
+  width: 60vw; height: 60vh;
+  background: radial-gradient(ellipse at center, rgba(26,78,140,0.18) 0%, transparent 70%);
+  animation: drift1 18s ease-in-out infinite alternate;
+}
+.bg-mesh::after {
+  content: '';
+  position: absolute;
+  bottom: -10%; right: -10%;
+  width: 50vw; height: 50vh;
+  background: radial-gradient(ellipse at center, rgba(79,142,247,0.08) 0%, transparent 70%);
+  animation: drift2 22s ease-in-out infinite alternate;
+}
+@keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(4%,3%) scale(1.08); } }
+@keyframes drift2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-3%,-4%) scale(1.06); } }
+
+/* ── NAV ───────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  background: rgba(7,10,15,0.75);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--border-dim);
+  transition: background var(--transition);
+}
+nav.scrolled {
+  background: rgba(7,10,15,0.92);
+  border-bottom-color: rgba(99,130,180,0.14);
+}
+.nav-logo {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-logo span {
+  display: inline-block;
+  width: 28px; height: 28px;
+  border: 1.5px solid var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-family: var(--ff-mono);
+  font-weight: 400;
+}
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+}
+.nav-links a {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--ice); }
+.nav-links a:hover::after { width: 100%; }
+
+/* ── HERO ──────────────────────────────────────── */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 8%;
+  z-index: 2;
+  overflow: hidden;
+}
+.hero-grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99,130,180,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,130,180,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+}
+.hero-content {
+  max-width: 860px;
+  z-index: 2;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 0.2s cubic-bezier(0.23,1,0.32,1) forwards;
+}
+.hero-badge::before {
+  content: '';
+  display: inline-block;
+  width: 28px; height: 1px;
+  background: var(--accent);
+}
+.hero-badge::after {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero-name {
+  font-family: var(--ff-display);
+  font-weight: 800;
+  font-size: clamp(3.5rem, 8vw, 7.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 0.35s cubic-bezier(0.23,1,0.32,1) forwards;
+}
+.hero-name .first { color: var(--text-primary); }
+.hero-name .last {
+  display: block;
+  background: linear-gradient(135deg, var(--accent-bright) 0%, var(--ice) 40%, rgba(126,184,247,0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-title {
+  font-family: var(--ff-body);
+  font-weight: 300;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 0.5s cubic-bezier(0.23,1,0.32,1) forwards;
+}
+.hero-bio {
+  max-width: 580px;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.9;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 0.65s cubic-bezier(0.23,1,0.32,1) forwards;
+  margin-bottom: 3rem;
+  border-left: 2px solid rgba(79,142,247,0.25);
+  padding-left: 1.5rem;
+}
+.hero-cta {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 0.8s cubic-bezier(0.23,1,0.32,1) forwards;
+}
+.btn-primary {
+  padding: 0.85rem 2.2rem;
+  background: linear-gradient(135deg, var(--accent) 0%, #2563EB 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: none;
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+  box-shadow: 0 0 30px rgba(79,142,247,0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px rgba(79,142,247,0.4);
+  filter: brightness(1.1);
+}
+.btn-ghost {
+  padding: 0.85rem 2.2rem;
+  background: transparent;
+  color: var(--ice);
+  border: 1px solid rgba(126,184,247,0.25);
+  border-radius: 6px;
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: none;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover {
+  border-color: rgba(126,184,247,0.5);
+  background: rgba(126,184,247,0.06);
+  transform: translateY(-2px);
+}
+.hero-stats {
+  position: absolute;
+  right: 8%;
+  bottom: 12%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 1s cubic-bezier(0.23,1,0.32,1) forwards;
+  z-index: 2;
+}
+.stat-item {
+  text-align: right;
+}
+.stat-num {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--accent-bright);
+  line-height: 1;
+}
+.stat-label {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeSlideUp 0.9s 1.2s cubic-bezier(0.23,1,0.32,1) forwards;
+  z-index: 2;
+}
+.scroll-line {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  animation: scrollPulse 2s infinite;
+}
+@keyframes scrollPulse {
+  0% { opacity: 0; transform: scaleY(0); transform-origin: top; }
+  50% { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(0); transform-origin: bottom; }
+}
+.scroll-label {
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION COMMON ────────────────────────────── */
+section {
+  position: relative;
+  z-index: 2;
+  padding: 8rem 8%;
+}
+.section-header {
+  margin-bottom: 5rem;
+}
+.section-eyebrow {
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  color: var(--accent);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.2rem;
+}
+.section-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 36px; height: 1px;
+  background: var(--accent);
+}
+.section-title {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-dim);
+  position: relative;
+  overflow: hidden;
+}
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scanLine 4s ease-in-out infinite;
+}
+@keyframes scanLine { 0%{left:-100%} 100%{left:200%} }
+
+/* ── PROJECTS ──────────────────────────────────── */
+#projects { background: var(--bg-deep); }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.8rem;
+}
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: none;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  will-change: transform;
+}
+.project-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(79,142,247,0.04) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 0;
+  pointer-events: none;
+}
+.project-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 20px 60px var(--shadow-deep), 0 0 40px var(--shadow-blue);
+}
+.project-card:hover::before { opacity: 1; }
+
+.card-image {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+  background: var(--midnight);
+}
+.card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(11,15,23,0.8) 100%);
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.23,1,0.32,1);
+  filter: saturate(0.85) brightness(0.9);
+}
+.project-card:hover .card-image img {
+  transform: scale(1.06);
+  filter: saturate(1) brightness(1);
+}
+
+.card-body {
+  padding: 1.8rem;
+  position: relative;
+  z-index: 1;
+}
+.card-number {
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  margin-bottom: 0.7rem;
+}
+.card-title {
+  font-family: var(--ff-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  line-height: 1.35;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+.card-desc {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin-bottom: 1.4rem;
+}
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-family: var(--ff-mono);
+  font-size: 0.62rem;
+  color: var(--text-mono);
+  background: rgba(79,142,247,0.08);
+  border: 1px solid rgba(79,142,247,0.15);
+  border-radius: 4px;
+  padding: 3px 9px;
+  letter-spacing: 0.08em;
+  transition: background 0.3s, border-color 0.3s;
+}
+.project-card:hover .tag {
+  background: rgba(79,142,247,0.14);
+  border-color: rgba(79,142,247,0.28);
+}
+
+/* Large card (first) */
+.project-card.large {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+.project-card.large .card-image {
+  height: 100%;
+  min-height: 300px;
+}
+.project-card.large .card-body {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.project-card.large .card-title {
+  font-size: 1.3rem;
+}
+
+/* ── CERTS ─────────────────────────────────────── */
+#certifications {
+  background: var(--bg-void);
+}
+.certs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.cert-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  padding: 1.4rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  cursor: none;
+  transition: transform var(--transition), border-color var(--transition), background var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.cert-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.cert-card:hover {
+  border-color: var(--border-glow);
+  background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
+.cert-card:hover::before { opacity: 1; }
+.cert-name {
+  font-family: var(--ff-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+.cert-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cert-issuer {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.cert-date {
+  font-family: var(--ff-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* ── SKILLS SECTION ────────────────────────────── */
+#skills {
+  background: var(--bg-deep);
+  padding: 8rem 8%;
+}
+.skills-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  margin-top: 4rem;
+}
+.skill-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  padding: 2rem;
+}
+.skill-group-title {
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+.skill-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(99,130,180,0.04);
+}
+.skill-item:last-child { border-bottom: none; }
+.skill-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex-shrink: 0;
+}
+.skill-name {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* ── CONTACT ───────────────────────────────────── */
+#contact {
+  background: var(--bg-void);
+  text-align: center;
+  padding: 8rem 8%;
+}
+.contact-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.contact-title {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--ice) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.contact-sub {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 3rem;
+}
+.contact-email {
+  display: inline-block;
+  font-family: var(--ff-mono);
+  font-size: 1.1rem;
+  color: var(--ice);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(126,184,247,0.3);
+  padding-bottom: 4px;
+  transition: border-color 0.3s, color 0.3s;
+  margin-bottom: 3rem;
+}
+.contact-email:hover {
+  color: var(--accent-bright);
+  border-color: var(--accent-bright);
+}
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 0.7rem 1.4rem;
+  cursor: none;
+  transition: all var(--transition);
+}
+.social-link:hover {
+  color: var(--ice);
+  border-color: var(--border-glow);
+  background: var(--ice-muted);
+}
+
+/* ── FOOTER ────────────────────────────────────── */
+footer {
+  position: relative;
+  z-index: 2;
+  padding: 2rem 8%;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-copy {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #22D3A0;
+  box-shadow: 0 0 8px rgba(34,211,160,0.6);
+  animation: blink 2.5s infinite;
+}
+
+/* ── REVEAL ANIMATION ──────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.8s cubic-bezier(0.23,1,0.32,1), transform 0.8s cubic-bezier(0.23,1,0.32,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ── GLASS ACCENT ──────────────────────────────── */
+.glass-accent {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+/* ── RESPONSIVE ────────────────────────────────── */
+@media (max-width: 900px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-card.large { grid-template-columns: 1fr; }
+  .project-card.large .card-image { height: 220px; }
+  .skills-container { grid-template-columns: 1fr; }
+  .hero-stats { display: none; }
+  nav { padding: 0 5%; }
+  section { padding: 6rem 5%; }
+  .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .certs-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="bg-mesh"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <span>DU</span>
+    Deha Uzar
+  </a>
+  <ul class="nav-links">
+    <li><a href="#projects">Projeler</a></li>
+    <li><a href="#skills">Yetkinlikler</a></li>
+    <li><a href="#certifications">Sertifikalar</a></li>
+    <li><a href="#contact">İletişim</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-lines"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Gömülü Sistemler &amp; Yapay Zeka</div>
+    <h1 class="hero-name">
+      <span class="first">Deha</span>
+      <span class="last">Uzar</span>
+    </h1>
+    <p class="hero-title">Gömülü Sistemler ve Yapay Zeka Geliştiricisi</p>
+    <p class="hero-bio">STM32 tabanlı gömülü sistemler, yapay zeka destekli sinyal işleme ve telekomünikasyon teknolojileri üzerine uçtan uca çözümler üreten yenilikçi geliştirici.</p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">Projeleri Keşfet</a>
+      <a href="#contact" class="btn-ghost">İletişime Geç</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Tamamlanan Proje</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">21</div>
+      <div class="stat-label">Sertifika</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">7+</div>
+      <div class="stat-label">Teknoloji Alanı</div>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-label">Scroll</span>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Projeler</div>
+    <h2 class="section-title">Geliştirilen Sistemler</h2>
+  </div>
+  <div class="section-divider" style="margin-bottom:4rem;"></div>
+
+  <div class="projects-grid">
+
+    <!-- Project 1: Large -->
+    <div class="project-card large reveal">
+      <div class="card-image">
+        <img src="https://i.ibb.co/8DkdCg3C/Ekran-Resmi-2026-05-09-13-38-14.png" alt="Hibrit Spektrum Tahkimatı">
+      </div>
+      <div class="card-body">
+        <div class="card-number">// 01</div>
+        <h3 class="card-title">Hibrit Spektrum Tahkimatı Projesi</h3>
+        <p class="card-desc">RF haberleşme sistemlerinde sinyal girişimlerini ve kasti parazitleri bertaraf etmek için STM32 mimarisinde geliştirilmiş ileri seviye spektrum savunma ve frekans atlama (FHSS) sistemi.</p>
+        <div class="card-tags">
+          <span class="tag">STM32 (ARM Cortex-M)</span>
+          <span class="tag">C</span>
+          <span class="tag">nRF24L01</span>
+          <span class="tag">Spektrum Analizi</span>
+          <span class="tag">FHSS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 2 -->
+    <div class="project-card reveal reveal-delay-1">
+      <div class="card-image">
+        <img src="https://i.ibb.co/cKfNYgy2/g-rsel-2026-05-09-134327499.png" alt="Acil Durum Otonom Haberleşme">
+      </div>
+      <div class="card-body">
+        <div class="card-number">// 02</div>
+        <h3 class="card-title">IoT Tabanlı Acil Durum Otonom Haberleşme ve İlk Yardım Sistemi</h3>
+        <p class="card-desc">Yüksek risk grubundaki bireyler için otonom anormallik tespit sistemi. STM32 mikrodenetleyicisi ile sensör verilerinin kararlı işlenmesi ve ESP8266 ile Wi-Fi üzerinden IoT platformuna anlık uyarı iletimi.</p>
+        <div class="card-tags">
+          <span class="tag">Gömülü Sistemler</span>
+          <span class="tag">C++</span>
+          <span class="tag">STM32</span>
+          <span class="tag">IoT</span>
+          <span class="tag">UART</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 3 -->
+    <div class="project-card reveal reveal-delay-2">
+      <div class="card-image">
+        <img src="https://i.ibb.co/fd1R0Wbm/Ekran-Resmi-2026-05-09-13-48-57.png" alt="Radar Sinyal Analizi">
+      </div>
+      <div class="card-body">
+        <div class="card-number">// 03</div>
+        <h3 class="card-title">Yapay Zeka Destekli Hava Savunma Radar Sinyali Analizi</h3>
+        <p class="card-desc">Hava savunma radar sinyallerini simüle eden ve sınıflandıran yapay zeka sistemi. Gerçek zamanlı FMCW radar simülatörü ile hedeflerin algılanması, Doppler analizi ve tehdit sınıflandırması. GPU hızlandırma entegrasyonu.</p>
+        <div class="card-tags">
+          <span class="tag">Python</span>
+          <span class="tag">C++</span>
+          <span class="tag">PyTorch</span>
+          <span class="tag">TensorFlow</span>
+          <span class="tag">CUDA</span>
+          <span class="tag">FastAPI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 4 -->
+    <div class="project-card reveal reveal-delay-1">
+      <div class="card-image">
+        <img src="https://i.ibb.co/m5BFgQZk/Ekran-Resmi-2026-05-09-13-51-39.png" alt="5G Network Simulator">
+      </div>
+      <div class="card-body">
+        <div class="card-number">// 04</div>
+        <h3 class="card-title">AI-Driven 5G Network Simulator: Dynamic Spectrum Management &amp; Traffic Prediction</h3>
+        <p class="card-desc">5G ağlarının performansını optimize eden yapay zeka simülatörü. Low/Mid-Band ve mmWave frekanslarında dinamik kaynak tahsisi. LSTM modelleriyle trafik tahmini ve sinyal kalitesinde yüksek optimizasyon.</p>
+        <div class="card-tags">
+          <span class="tag">Python</span>
+          <span class="tag">TensorFlow/Keras</span>
+          <span class="tag">NS-3</span>
+          <span class="tag">OMNeT++</span>
+          <span class="tag">LSTM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 5 -->
+    <div class="project-card reveal reveal-delay-2">
+      <div class="card-image">
+        <img src="https://i.ibb.co/4gK4c9Sx/Ekran-Resmi-2026-05-09-13-54-04.png" alt="Veri Merkezi Soğutma">
+      </div>
+      <div class="card-body">
+        <div class="card-number">// 05</div>
+        <h3 class="card-title">STM32 Tabanlı Akıllı Veri Merkezi Termal Yönetim ve Soğutma Optimizasyon Sistemi</h3>
+        <p class="card-desc">Veri merkezlerinde enerji maliyetlerini düşürmek için STM32 üzerinde koşan gerçek zamanlı termal kontrol sistemi. PWM sinyalleriyle kapalı döngü soğutma kontrolü ve kritik eşikler için kesme tabanlı alarm yönetimi.</p>
+        <div class="card-tags">
+          <span class="tag">STM32</span>
+          <span class="tag">C</span>
+          <span class="tag">I2C/Analog</span>
+          <span class="tag">Closed-Loop Control</span>
+          <span class="tag">PWM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 6 -->
+    <div class="project-card reveal reveal-delay-3">
+      <div class="card-image">
+        <img src="https://i.ibb.co/zVJ1GmGf/Ekran-Resmi-2026-05-09-13-55-59.png" alt="Optik Veri İşleme">
+      </div>
+      <div class="card-body">
+        <div class="card-number">// 06</div>
+        <h3 class="card-title">Optik Veri İşleme ve Koruma Sistemi (O-Link)</h3>
+        <p class="card-desc">STM32 altyapısı kullanılarak geliştirilen yüksek güvenlikli, parazitlere karşı dirençli optik veri transfer ve koruma sistemi.</p>
+        <div class="card-tags">
+          <span class="tag">STM32</span>
+          <span class="tag">Optik Haberleşme</span>
+          <span class="tag">Veri Güvenliği</span>
+          <span class="tag">Sinyal İşleme</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Yetkinlikler</div>
+    <h2 class="section-title">Teknik Uzmanlık</h2>
+  </div>
+  <div class="section-divider" style="margin-bottom:1rem;"></div>
+  <div class="skills-container">
+    <div class="skill-group reveal reveal-delay-1">
+      <div class="skill-group-title">Gömülü Sistemler</div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">STM32 (ARM Cortex-M)</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">UART / I2C / SPI Protokolleri</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">PWM & Kapalı Döngü Kontrol</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">nRF24L01 / RF Haberleşme</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">FHSS / Spektrum Yönetimi</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">Optik Haberleşme</span></div>
+    </div>
+    <div class="skill-group reveal reveal-delay-2">
+      <div class="skill-group-title">Yapay Zeka & Sinyal İşleme</div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">PyTorch / TensorFlow</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">CUDA / TensorRT (GPU Hızlandırma)</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">LSTM / Derin Öğrenme</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">FMCW Radar / Doppler Analizi</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">Spektrum Analizi & Sınıflandırma</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">MATLAB / Simülasyon</span></div>
+    </div>
+    <div class="skill-group reveal reveal-delay-3">
+      <div class="skill-group-title">Yazılım & Telekomünikasyon</div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">C / C++ / Python</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">IoT Sistemleri (ESP8266)</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">NS-3 / OMNeT++ Simülatörleri</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">5G / mmWave Ağ Protokolleri</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">FastAPI / RESTful Servisler</span></div>
+      <div class="skill-item"><div class="skill-dot"></div><span class="skill-name">Ağ Güvenliği / Siber Savunma</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Sertifikasyonlar</div>
+    <h2 class="section-title">Eğitim &amp; Yeterlilikler</h2>
+  </div>
+  <div class="section-divider" style="margin-bottom:4rem;"></div>
+  <div class="certs-grid">
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">MATLAB Onramp</div>
+      <div class="cert-meta"><span class="cert-issuer">MathWorks</span><span class="cert-date">Şub 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">Uygulamalı SPSS</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">—</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">SIEM Temelleri</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Şub 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">Yapay Zeka İle Ürün Geliştirme Simülasyonu</div>
+      <div class="cert-meta"><span class="cert-issuer">Ludi</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">Transfer Öğrenimi</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">Sistem Mühendisliği</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">Machine Learning</div>
+      <div class="cert-meta"><span class="cert-issuer">Turkcell Geleceği Yazanlar</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">STM32 İle Gömülü Yazılım Geliştirme</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">Fortinet Güvenlik Duvari Temelleri</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">Linux Bash Script</div>
+      <div class="cert-meta"><span class="cert-issuer">Techcareer.net</span><span class="cert-date">Oca 2025</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">Elektrik Elektronik Mühendisliği Simülasyonu</div>
+      <div class="cert-meta"><span class="cert-issuer">Ludi</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">Integrated Circuit Design</div>
+      <div class="cert-meta"><span class="cert-issuer">Ludi</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">Fundamentals of Digital Marketing</div>
+      <div class="cert-meta"><span class="cert-issuer">Google Digital Academy</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">Introduction to Internet Of Things</div>
+      <div class="cert-meta"><span class="cert-issuer">Cisco Networking Academy</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">Veri Analizi ve Veri Modelleme</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">Introduction to Cybersecurity</div>
+      <div class="cert-meta"><span class="cert-issuer">Cisco</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">C# ile Algoritma Ve Programlama</div>
+      <div class="cert-meta"><span class="cert-issuer">Turkcell Geleceği Yazanlar</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">İleri Ağ Teknolojileri</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-1">
+      <div class="cert-name">Temel Ağ Teknolojileri</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-2">
+      <div class="cert-name">C Programlama Dili</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Ara 2024</span></div>
+    </div>
+
+    <div class="cert-card reveal reveal-delay-3">
+      <div class="cert-name">Telekomünikasyon Sistemleri Güvenliği</div>
+      <div class="cert-meta"><span class="cert-issuer">BTK Akademi</span><span class="cert-date">Kas 2024</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner reveal">
+    <div class="section-eyebrow" style="justify-content:center;">İletişim</div>
+    <h2 class="contact-title">Birlikte Bir Şeyler<br>İnşa Edelim</h2>
+    <p class="contact-sub">Gömülü sistemler, yapay zeka veya telekomünikasyon alanında ortak bir proje ya da iş birliği için iletişime geçmekten çekinmeyin.</p>
+    <a href="mailto:dehauzarr@gmail.com" class="contact-email">dehauzarr@gmail.com</a>
+    <div class="social-links">
+      <a href="#" class="social-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <a href="#" class="social-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+      <a href="#" class="social-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Portföy
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-copy">© 2026 Deha Uzar. Tüm hakları saklıdır.</span>
+  <div class="footer-status">
+    <div class="status-dot"></div>
+    Proje Kabulüne Açık
+  </div>
+</footer>
+
+<script>
+// ── CURSOR ──────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = (mx - 5) + 'px';
+  cursor.style.top = (my - 5) + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx - 18) * 0.12;
+  ry += (my - ry - 18) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button, .project-card, .cert-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+});
+
+// ── NAVBAR SCROLL ────────────────────────────────
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── INTERSECTION OBSERVER (REVEAL) ───────────────
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+reveals.forEach(r => obs.observe(r));
+
+// ── 3D TILT ON PROJECT CARDS ─────────────────────
+document.querySelectorAll('.project-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    card.style.transform = `perspective(900px) rotateX(${-dy * 4}deg) rotateY(${dx * 4}deg) translateY(-4px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+
+// ── SMOOTH ANCHOR SCROLL ─────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
